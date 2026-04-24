@@ -1,4 +1,4 @@
 INSERT INTO `banner` (`title`, `image`, `link`, `sort`, `status`) VALUES
-('New Arrivals', 'https://via.placeholder.com/1200x360/ff6b6b/ffffff', '/products', 1, 1),
-('Special Offer', 'https://via.placeholder.com/1200x360/4ecdc4/ffffff', '/products', 2, 1),
-('Brand Zone', 'https://via.placeholder.com/1200x360/45b7d1/ffffff', '/products', 3, 1);
+('品质配件 极速配送', '', '/products', 1, 1),
+('新品上市 限时优惠', '', '/products', 2, 1),
+('品牌专区 正品保障', '', '/products', 3, 1);

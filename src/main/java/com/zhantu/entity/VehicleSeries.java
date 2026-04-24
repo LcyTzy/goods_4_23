@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("vehicle_series")
@@ -16,4 +17,6 @@ public class VehicleSeries {
     private Integer status;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+    @TableField(exist = false)
+    private List<VehicleModel> models;
 }

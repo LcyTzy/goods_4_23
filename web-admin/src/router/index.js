@@ -45,6 +45,36 @@ const routes = [
         name: 'Users',
         component: () => import('@/views/UserManage.vue'),
         meta: { title: '用户管理' }
+      },
+      {
+        path: 'purchase',
+        name: 'Purchase',
+        component: () => import('@/views/purchase/PurchaseManage.vue'),
+        meta: { title: '采购管理' }
+      },
+      {
+        path: 'inventory',
+        name: 'Inventory',
+        component: () => import('@/views/inventory/InventoryLog.vue'),
+        meta: { title: '库存流水' }
+      },
+      {
+        path: 'service-appointment',
+        name: 'ServiceAppointment',
+        component: () => import('@/views/service/ServiceAppointment.vue'),
+        meta: { title: '服务预约' }
+      },
+      {
+        path: 'epc/vehicle',
+        name: 'VehicleManage',
+        component: () => import('@/views/epc/VehicleManage.vue'),
+        meta: { title: '车型管理' }
+      },
+      {
+        path: 'epc/part-relation',
+        name: 'PartRelation',
+        component: () => import('@/views/epc/PartRelation.vue'),
+        meta: { title: '配件关联' }
       }
     ]
   }

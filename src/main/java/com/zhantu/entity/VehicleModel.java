@@ -16,6 +16,7 @@ public class VehicleModel {
     private String displacement;
     private String engine;
     private String transmission;
+    private String vinPrefix;
     private Integer sort;
     private Integer status;
     @TableField(fill = FieldFill.INSERT)

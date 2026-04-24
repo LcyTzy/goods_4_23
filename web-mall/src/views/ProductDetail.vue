@@ -69,6 +69,16 @@
               <p>品牌: {{ product.brand || '-' }}</p>
             </div>
           </el-tab-pane>
+          <el-tab-pane :label="`适用车型 (${applicableVehicles.length})`" name="vehicles" v-if="applicableVehicles.length > 0">
+            <div class="vehicle-list">
+              <el-table :data="applicableVehicles" stripe>
+                <el-table-column prop="name" label="车型名称" />
+                <el-table-column prop="year" label="年款" width="100" />
+                <el-table-column prop="displacement" label="排量" width="100" />
+                <el-table-column prop="position" label="安装位置" width="120" />
+              </el-table>
+            </div>
+          </el-tab-pane>
           <el-tab-pane label="商品评价" name="review">
             <ProductReview :productId="product.id" />
           </el-tab-pane>
@@ -94,6 +104,7 @@ const loading = ref(false)
 const quantity = ref(1)
 const activeTab = ref('detail')
 const isFavorite = ref(false)
+const applicableVehicles = ref([])
 
 const handleAddToCart = async () => {
   const token = localStorage.getItem('userToken')
@@ -145,7 +156,8 @@ const loadProduct = async () => {
   loading.value = true
   try {
     const res = await getProductDetail(route.params.id)
-    product.value = res.data
+    product.value = res.data.product
+    applicableVehicles.value = res.data.applicableVehicles || []
     const token = localStorage.getItem('userToken')
     if (token) {
       try {
@@ -271,5 +283,9 @@ onMounted(loadProduct)
 .detail-content p {
   margin: 8px 0;
   color: #666;
+}
+
+.vehicle-list {
+  padding: 10px 0;
 }
 </style>

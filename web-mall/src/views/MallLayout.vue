@@ -18,6 +18,7 @@
               <el-tag size="small" class="search-tag" @click="searchKeyword='机油'; handleSearch()">机油</el-tag>
               <el-tag size="small" class="search-tag" @click="searchKeyword='刹车片'; handleSearch()">刹车片</el-tag>
               <el-tag size="small" class="search-tag" @click="searchKeyword='滤清器'; handleSearch()">滤清器</el-tag>
+              <el-button size="small" type="primary" link @click="openVinQuery">VIN查配件</el-button>
             </div>
           </div>
           <div class="header-actions">
@@ -53,6 +54,7 @@
           <el-menu :default-active="activeMenu" mode="horizontal" :ellipsis="false" @select="handleNavSelect">
             <el-menu-item index="/home">首页</el-menu-item>
             <el-menu-item index="/products">全部商品</el-menu-item>
+            <el-menu-item index="/service">预约修车</el-menu-item>
           </el-menu>
         </div>
       </nav>
@@ -68,6 +70,7 @@
         <p>Copyright © 2024 Zhantu Auto Parts Mall. All rights reserved.</p>
       </div>
     </footer>
+    <VinQueryDialog ref="vinQueryDialog" />
   </div>
 </template>
 
@@ -76,11 +79,17 @@ import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
+import VinQueryDialog from '@/components/VinQueryDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 const searchKeyword = ref('')
+const vinQueryDialog = ref(null)
+
+const openVinQuery = () => {
+  vinQueryDialog.value?.open()
+}
 
 const activeMenu = computed(() => {
   if (route.path.startsWith('/products')) return '/products'

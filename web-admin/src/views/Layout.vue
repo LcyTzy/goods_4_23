@@ -34,6 +34,26 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-sub-menu index="inventory-menu">
+          <template #title>
+            <el-icon><Box /></el-icon>
+            <span>进销存管理</span>
+          </template>
+          <el-menu-item index="/purchase">采购管理</el-menu-item>
+          <el-menu-item index="/inventory">库存流水</el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu index="epc-menu">
+          <template #title>
+            <el-icon><Connection /></el-icon>
+            <span>EPC管理</span>
+          </template>
+          <el-menu-item index="/epc/vehicle">车型管理</el-menu-item>
+          <el-menu-item index="/epc/part-relation">配件关联</el-menu-item>
+        </el-sub-menu>
+        <el-menu-item index="/service-appointment">
+          <el-icon><Calendar /></el-icon>
+          <span>服务预约</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container class="main-container">

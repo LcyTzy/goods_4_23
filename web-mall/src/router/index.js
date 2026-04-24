@@ -71,6 +71,12 @@ const routes = [
         name: 'Points',
         component: () => import('@/views/Points.vue'),
         meta: { title: '我的积分' }
+      },
+      {
+        path: 'service',
+        name: 'ServiceAppointment',
+        component: () => import('@/views/ServiceAppointment.vue'),
+        meta: { title: '预约修车' }
       }
     ]
   },

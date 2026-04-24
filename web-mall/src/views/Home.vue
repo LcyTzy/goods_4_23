@@ -10,18 +10,29 @@
             </p>
             <p v-else>选择您的车型，精准匹配配件</p>
           </div>
-          <el-button type="primary" size="large" @click="showVehicleSelector = true">
-            {{ selectedVehicle ? '重新选择' : '选择车型' }}
-          </el-button>
+          <div class="vehicle-actions">
+            <el-button type="primary" size="large" @click="showVehicleSelector = true">
+              {{ selectedVehicle ? '重新选择' : '选择车型' }}
+            </el-button>
+            <el-button size="large" @click="openVinQuery">
+              VIN查配件
+            </el-button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="banner-section">
       <el-carousel height="360px" :interval="4000" v-loading="bannerLoading">
-        <el-carousel-item v-for="banner in banners" :key="banner.id">
-          <div class="banner-item" @click="handleBannerClick(banner)">
-            <el-image :src="banner.image" fit="cover" style="width: 100%; height: 100%" />
+        <el-carousel-item v-for="(banner, index) in banners" :key="banner.id">
+          <div class="banner-item" @click="handleBannerClick(banner)" :style="getBannerStyle(banner, index)">
+            <el-image 
+              v-if="banner.image && !banner.image.includes('via.placeholder.com')"
+              :src="banner.image" 
+              fit="cover" 
+              style="width: 100%; height: 100%"
+              @error="handleImageError"
+            />
             <div class="banner-overlay">
               <h2>{{ banner.title }}</h2>
             </div>
@@ -70,6 +81,7 @@
     </div>
 
     <VehicleSelector v-model="showVehicleSelector" @confirm="handleVehicleConfirm" />
+    <VinQueryDialog ref="vinQueryDialogRef" />
   </div>
 </template>
 
@@ -79,6 +91,7 @@ import { useRouter } from 'vue-router'
 import { getCategoryTree, getProductPage } from '@/api/product'
 import { getBanners } from '@/api/banner'
 import VehicleSelector from '@/components/VehicleSelector.vue'
+import VinQueryDialog from '@/components/VinQueryDialog.vue'
 
 const router = useRouter()
 const categories = ref([])
@@ -87,6 +100,7 @@ const banners = ref([])
 const bannerLoading = ref(false)
 const showVehicleSelector = ref(false)
 const selectedVehicle = ref(null)
+const vinQueryDialogRef = ref(null)
 
 const categoryIcons = {
   '机油': '🛢️',
@@ -104,6 +118,31 @@ const handleVehicleConfirm = (vehicle) => {
   selectedVehicle.value = vehicle
   localStorage.setItem('selectedVehicle', JSON.stringify(vehicle))
   router.push({ path: '/products', query: { vehicleModelId: vehicle.model.id } })
+}
+
+const openVinQuery = () => {
+  vinQueryDialogRef.value.open()
+}
+
+const bannerGradients = [
+  'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+]
+
+const handleImageError = (e) => {
+  const parent = e.target.parentElement
+  if (parent) {
+    e.target.style.display = 'none'
+    parent.style.background = bannerGradients[Math.floor(Math.random() * bannerGradients.length)]
+  }
+}
+
+const getBannerStyle = (banner, index) => {
+  if (banner.image && banner.image.includes('via.placeholder.com')) {
+    return { background: bannerGradients[index % bannerGradients.length] }
+  }
+  return {}
 }
 
 const handleBannerClick = (banner) => {
@@ -174,6 +213,11 @@ onMounted(loadData)
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.vehicle-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .vehicle-info h3 {

@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getCategoryTree, getProductPage } from '@/api/product'
 
@@ -91,6 +91,21 @@ const pagination = reactive({
   pageNum: 1,
   pageSize: 12
 })
+
+watch(() => route.query, (newQuery) => {
+  if (newQuery.vehicleModelId) {
+    filters.vehicleModelId = parseInt(newQuery.vehicleModelId)
+    const vehicleStr = localStorage.getItem('selectedVehicle')
+    if (vehicleStr) {
+      selectedVehicle.value = JSON.parse(vehicleStr)
+    }
+  } else {
+    filters.vehicleModelId = null
+    selectedVehicle.value = null
+  }
+  pagination.pageNum = 1
+  loadProducts()
+}, { deep: true })
 
 const goToDetail = (id) => {
   router.push(`/product/${id}`)
