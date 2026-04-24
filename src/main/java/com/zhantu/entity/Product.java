@@ -26,6 +26,8 @@ public class Product {
     private String brand;
     private String image;
     private String vinCompatible;
+    private String oeNumber;
+    private String groupCode;
     private Integer status;
     private Integer sales;
     @TableField(exist = false)

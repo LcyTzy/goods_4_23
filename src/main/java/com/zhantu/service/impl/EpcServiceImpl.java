@@ -9,7 +9,8 @@ import com.zhantu.mapper.VehicleModelMapper;
 import com.zhantu.service.EpcService;
 import com.zhantu.service.ProductService;
 import com.zhantu.service.VehiclePartRelationService;
-import com.zhantu.util.VinDecoder;
+import com.zhantu.service.VinRuleDecoder;
+import com.zhantu.model.VehicleInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,16 +24,31 @@ public class EpcServiceImpl extends ServiceImpl<VehicleModelMapper, VehicleModel
 
     private final ProductService productService;
     private final VehiclePartRelationService vehiclePartRelationService;
+    private final VinRuleDecoder vinRuleDecoder;
 
     @Override
     public Map<String, Object> queryByVin(String vin) {
-        Map<String, Object> result = VinDecoder.decodeVin(vin);
+        Map<String, Object> result = new HashMap<>();
         
-        if (!(Boolean) result.get("valid")) {
+        if (vin == null || vin.length() != 17) {
+            result.put("valid", false);
+            result.put("message", "Invalid VIN length");
             return result;
         }
         
-        String vinPrefix = (String) result.get("vinPrefix");
+        VehicleInfo info = vinRuleDecoder.decodeByRule(vin.toUpperCase());
+        if (info == null) {
+            result.put("valid", false);
+            result.put("message", "VIN decode failed");
+            return result;
+        }
+        
+        result.put("valid", true);
+        result.put("brand", info.getBrandName());
+        result.put("year", info.getYear());
+        result.put("origin", "China");
+        
+        String vinPrefix = vin.substring(0, 3).toUpperCase();
         List<VehicleModel> models = getModelsByVinPrefix(vinPrefix);
         result.put("models", models);
         result.put("modelCount", models.size());

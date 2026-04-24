@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" title="VIN查配件" width="600px">
+  <el-dialog v-model="visible" title="VIN查配件" width="700px">
     <el-input
       v-model="vin"
       placeholder="请输入17位VIN码"
@@ -7,42 +7,59 @@
       @keyup.enter="handleQuery"
     >
       <template #append>
-        <el-button @click="handleQuery">查询</el-button>
+        <el-button @click="handleQuery" :loading="loading">查询</el-button>
       </template>
     </el-input>
 
-    <div v-if="vinResult" class="vin-result" v-loading="loading">
-      <el-descriptions :column="2" border class="vin-info">
-        <el-descriptions-item label="产地">{{ vinResult.origin }}</el-descriptions-item>
-        <el-descriptions-item label="品牌">{{ vinResult.brand }}</el-descriptions-item>
-        <el-descriptions-item label="年款">{{ vinResult.year }}</el-descriptions-item>
-        <el-descriptions-item label="匹配车型数">{{ vinResult.modelCount }}</el-descriptions-item>
-      </el-descriptions>
+    <div v-if="vehicle" class="vin-result" v-loading="loading">
+      <el-card class="vehicle-card">
+        <template #header>
+          <div class="card-header">
+            <span>车辆信息：{{ vehicle.name || vehicle.seriesName }}</span>
+            <el-tag v-if="vehicle.source === 'rule'" type="info" size="small">规则解析</el-tag>
+            <el-tag v-else type="success" size="small">API解析</el-tag>
+          </div>
+        </template>
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="品牌">{{ vehicle.brandName }}</el-descriptions-item>
+          <el-descriptions-item label="厂商">{{ vehicle.manufacturer }}</el-descriptions-item>
+          <el-descriptions-item label="车系">{{ vehicle.seriesName }}</el-descriptions-item>
+          <el-descriptions-item label="年款">{{ vehicle.year }}</el-descriptions-item>
+          <el-descriptions-item label="车型名称">{{ vehicle.name }}</el-descriptions-item>
+          <el-descriptions-item label="车辆型号">{{ vehicle.model }}</el-descriptions-item>
+          <el-descriptions-item label="燃料类型">{{ vehicle.powerType }}</el-descriptions-item>
+          <el-descriptions-item label="排量">{{ vehicle.displacement }}</el-descriptions-item>
+          <el-descriptions-item label="变速箱">{{ vehicle.gearbox }}</el-descriptions-item>
+          <el-descriptions-item label="驱动方式">{{ vehicle.drivenType }}</el-descriptions-item>
+          <el-descriptions-item label="排放标准">{{ vehicle.effluentStandard }}</el-descriptions-item>
+          <el-descriptions-item label="发动机型号">{{ vehicle.engineModel }}</el-descriptions-item>
+          <el-descriptions-item label="指导价">{{ vehicle.price }}</el-descriptions-item>
+          <el-descriptions-item label="车身颜色">{{ vehicle.color }}</el-descriptions-item>
+          <el-descriptions-item label="核定载客">{{ vehicle.zws }}</el-descriptions-item>
+          <el-descriptions-item label="长宽高">{{ vehicle.size }}</el-descriptions-item>
+          <el-descriptions-item label="轴距">{{ vehicle.wheelbase }}</el-descriptions-item>
+        </el-descriptions>
+        <div v-if="vehicle.remark" class="remark">{{ vehicle.remark }}</div>
+      </el-card>
 
-      <div v-if="vinResult.models && vinResult.models.length > 0" class="model-list">
-        <h4>匹配车型</h4>
-        <el-table :data="vinResult.models" @row-click="selectModel" style="cursor: pointer">
-          <el-table-column prop="name" label="车型名称" />
-          <el-table-column prop="year" label="年款" width="80" />
-          <el-table-column prop="displacement" label="排量" width="80" />
-        </el-table>
-      </div>
-
-      <div v-if="parts.length > 0" class="parts-list">
-        <h4>适用配件</h4>
-        <el-table :data="parts">
+      <el-card v-if="matchedParts && matchedParts.length > 0" class="parts-card">
+        <template #header>适用配件（{{ matchedParts.length }}件）</template>
+        <el-table :data="matchedParts" stripe>
           <el-table-column prop="code" label="编号" width="120" />
-          <el-table-column prop="name" label="名称" />
+          <el-table-column prop="name" label="配件名称" />
           <el-table-column prop="oem" label="OE号" width="120" />
           <el-table-column prop="price" label="价格" width="100">
             <template #default="{ row }">¥{{ row.price }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="80">
+          <el-table-column label="操作" width="100">
             <template #default="{ row }">
               <el-button size="small" @click.stop="goToDetail(row.id)">查看</el-button>
             </template>
           </el-table-column>
         </el-table>
+      </el-card>
+      <div v-else-if="vehicle && vehicle.source === 'api'" class="no-parts">
+        暂未找到适配配件
       </div>
     </div>
 
@@ -60,46 +77,44 @@ import request from '@/utils/request'
 
 const visible = ref(false)
 const vin = ref('')
-const vinResult = ref(null)
-const parts = ref([])
+const vehicle = ref(null)
+const matchedParts = ref([])
 const loading = ref(false)
 const router = useRouter()
 
 const open = () => {
   visible.value = true
   vin.value = ''
-  vinResult.value = null
-  parts.value = []
+  vehicle.value = null
+  matchedParts.value = []
 }
 
 const handleQuery = async () => {
-  if (vin.value.length !== 17) {
-    ElMessage.warning('请输入17位VIN码')
+  const vinCode = vin.value.trim().toUpperCase()
+  if (vinCode.length !== 17) {
+    ElMessage.warning('VIN码必须为17位')
     return
   }
   loading.value = true
   try {
-    const res = await request.get('/api/epc/query-by-vin', {
-      params: { vin: vin.value }
+    const res = await request.get('/vehicle/decode', {
+      params: { vin: vinCode }
     })
-    vinResult.value = res.data
-    parts.value = []
-  } catch (e) {
-    ElMessage.error('查询失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-const selectModel = async (row) => {
-  loading.value = true
-  try {
-    const res = await request.get('/api/epc/parts', {
-      params: { modelId: row.id }
-    })
-    parts.value = res.data
-  } catch (e) {
-    ElMessage.error('加载配件失败')
+    if (res.code === 200) {
+      vehicle.value = res.vehicle
+      matchedParts.value = res.matchedParts || []
+      if (!res.vehicle) {
+        ElMessage.info('未查询到该车辆信息')
+      }
+    } else {
+      ElMessage.error(res.message || '查询失败')
+      vehicle.value = null
+      matchedParts.value = []
+    }
+  } catch (error) {
+    ElMessage.error('查询失败，请稍后重试')
+    vehicle.value = null
+    matchedParts.value = []
   } finally {
     loading.value = false
   }
@@ -118,16 +133,29 @@ defineExpose({ open })
   margin-top: 20px;
 }
 
-.vin-info {
+.vehicle-card {
   margin-bottom: 20px;
 }
 
-.model-list, .parts-list {
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.remark {
+  margin-top: 10px;
+  color: #999;
+  font-size: 12px;
+}
+
+.parts-card {
   margin-top: 20px;
 }
 
-.model-list h4, .parts-list h4 {
-  margin-bottom: 10px;
-  color: #333;
+.no-parts {
+  margin-top: 20px;
+  color: #999;
+  text-align: center;
 }
 </style>

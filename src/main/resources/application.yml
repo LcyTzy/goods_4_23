@@ -34,6 +34,13 @@ jwt:
   secret: zhantu-autoparts-mall-jwt-secret-key-2024-very-long-and-secure
   expiration: 86400000
 
+vin:
+  tanshu:
+    api-key: f25667d22ac7cbda025f9734e38c92fd
+  api17:
+    user: 13194717525
+    password: sd6yh78ju
+
 logging:
   level:
     com.zhantu: debug

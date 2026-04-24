@@ -1,4 +1,4 @@
-package com.zhantu.controller;
+package com.zhantu.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zhantu.common.Result;
